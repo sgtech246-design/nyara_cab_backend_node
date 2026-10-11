@@ -12,7 +12,7 @@ async function startServer() {
     const server = app.listen(PORT, '0.0.0.0', () => {
       console.log(`===================================================`);
       console.log(`🚀 Nyara Cab Node.js Backend Server running on port ${PORT}`);
-      console.log(`📡 Base API URL: https://nyaracab.vercel.app/api/v1`);
+      console.log(`📡 Base API URL: https://nyara-cab-backend-node.vercel.app/api/v1`);
       console.log(`===================================================`);
     });
 
