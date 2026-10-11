@@ -220,6 +220,16 @@ export async function getDb() {
       `);
 
       await conn.query(`
+        CREATE TABLE IF NOT EXISTS marketplace_reported_posts (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          post_id INT NOT NULL,
+          reporter_id INT NULL,
+          reason VARCHAR(255) NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      `);
+
+      await conn.query(`
         CREATE TABLE IF NOT EXISTS notifications (
           id INT AUTO_INCREMENT PRIMARY KEY,
           user_id INT NOT NULL,
@@ -352,6 +362,14 @@ export async function getDb() {
       reported_user_id INTEGER NOT NULL,
       reason TEXT NOT NULL,
       description TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS marketplace_reported_posts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      post_id INTEGER NOT NULL,
+      reporter_id INTEGER,
+      reason TEXT NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
