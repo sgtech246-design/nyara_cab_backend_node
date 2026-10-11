@@ -28,9 +28,12 @@ app.use(morgan('dev'));
 // Static uploads folder
 app.use('/uploads', express.static(uploadsDir));
 
-// Static Admin Panel frontend
+// Static Admin Panel frontend (public folder on Vercel or local dist)
+const publicDir = path.join(process.cwd(), 'public');
 const adminDistDir = path.resolve(process.cwd(), '..', 'nyara_cab_admin', 'dist');
-if (fs.existsSync(adminDistDir)) {
+if (fs.existsSync(publicDir)) {
+  app.use(express.static(publicDir));
+} else if (fs.existsSync(adminDistDir)) {
   app.use(express.static(adminDistDir));
 }
 
@@ -64,9 +67,13 @@ app.use('/api', routes);
 // Serve SPA Admin index.html for non-API web routes
 app.get('*', (req, res, next) => {
   if (req.accepts('html') && !req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
-    const indexPath = path.join(adminDistDir, 'index.html');
-    if (fs.existsSync(indexPath)) {
-      return res.sendFile(indexPath);
+    const publicIndexPath = path.join(publicDir, 'index.html');
+    const parentIndexPath = path.join(adminDistDir, 'index.html');
+    if (fs.existsSync(publicIndexPath)) {
+      return res.sendFile(publicIndexPath);
+    }
+    if (fs.existsSync(parentIndexPath)) {
+      return res.sendFile(parentIndexPath);
     }
   }
   next();
