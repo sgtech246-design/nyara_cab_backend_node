@@ -6,7 +6,9 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const sqlitePath = path.join(__dirname, '../../database.sqlite');
+const sqlitePath = process.env.VERCEL
+  ? path.join('/tmp', 'database.sqlite')
+  : path.join(__dirname, '../../database.sqlite');
 
 let dbDriver = null; // 'mysql' or 'sqlite'
 let pool = null;
@@ -17,17 +19,24 @@ export async function getDb() {
     return createDbWrapper();
   }
 
-  const dbConn = process.env.DB_CONNECTION || 'mysql';
+  const isVercel = Boolean(process.env.VERCEL);
+  const dbConn = process.env.DB_CONNECTION || (isVercel && !process.env.DB_HOST ? 'sqlite' : 'mysql');
   const host = process.env.DB_HOST || '127.0.0.1';
   const port = Number(process.env.DB_PORT) || 3306;
   const user = process.env.DB_USER || 'root';
   const password = process.env.DB_PASSWORD || '';
   const database = process.env.DB_DATABASE || 'nyara_cab';
 
-  if (dbConn === 'mysql' || dbConn === 'mariadb') {
+  if ((dbConn === 'mysql' || dbConn === 'mariadb') && (!isVercel || process.env.DB_HOST)) {
     try {
       // 1. Create database if not exists
-      const tempConn = await mysql.createConnection({ host, port, user, password });
+      const tempConn = await mysql.createConnection({
+        host,
+        port,
+        user,
+        password,
+        connectTimeout: 3000,
+      });
       await tempConn.query(`CREATE DATABASE IF NOT EXISTS \`${database}\`;`);
       await tempConn.end();
 
